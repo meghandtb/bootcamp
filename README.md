@@ -19,3 +19,34 @@ Just give me a headline, and I’ll give you insight. 🧠
     🧠 Summarize: Use Ollama to get a TL;DR of any stored article — great for busy bees!
 
     🧹 Reset: Clear the database if you want a fresh start.
+
+
+🗞️ _Get the news while they're hot!_ 🔥
+
+---
+
+## ⚙️ Setup
+
+### 🧰 Prerequisites
+
+- Python 3.8+
+- Terraform
+- AWS credentials configured (`aws configure`)
+- `Ollama` installed and running locally
+
+### 🪄 Setup using Makefile
+
+This project comes with a handy Makefile to make setup and execution simple.
+|-----------------------------------------------------------------------|
+| Command        | What it does                                         |
+|----------------|------------------------------------------------------|
+| `make install` | Installs all Python dependencies                     |
+| `make clean`   | Removes Python cache files                           |
+| `make run`     | Runs the CLI application (`cli.py`)                  |
+| `make init`    | Initializes the Terraform backend                    |
+| `make plan`    | Shows what Terraform will create                     |
+| `make apply`   | Applies the Terraform configuration (DynamoDB, etc.) |
+| `make destroy` | Destroys the Terraform infrastructure                |
+|-----------------------------------------------------------------------|
+
+
