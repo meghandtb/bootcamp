@@ -1,0 +1,5 @@
+dotenv
+readabilipy
+markdownify
+boto3
+rich
