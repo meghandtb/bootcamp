@@ -36,9 +36,7 @@ Just give me a headline, and I’ll give you insight. 🧠
 
 ### 🪄 Setup using Makefile
 
-This project comes with a handy Makefile to make setup and execution simple.
-|-----------------------------------------------------------------------|
-| Command        | What it does                                         |
+| Command         | What it does                                         |
 |----------------|------------------------------------------------------|
 | `make install` | Installs all Python dependencies                     |
 | `make clean`   | Removes Python cache files                           |
@@ -47,6 +45,5 @@ This project comes with a handy Makefile to make setup and execution simple.
 | `make plan`    | Shows what Terraform will create                     |
 | `make apply`   | Applies the Terraform configuration (DynamoDB, etc.) |
 | `make destroy` | Destroys the Terraform infrastructure                |
-|-----------------------------------------------------------------------|
 
 
