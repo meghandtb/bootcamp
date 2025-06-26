@@ -31,8 +31,9 @@ Just give me a headline, and I’ll give you insight. 🧠
 
 - Python 3.8+
 - Terraform
+- Docker
 - AWS credentials configured (`aws configure`)
-- `Ollama` installed and running locally
+- `Ollama` installed and running locally in a docker container
 
 ### 🪄 Setup using Makefile
 
