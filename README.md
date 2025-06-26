@@ -47,4 +47,51 @@ Just give me a headline, and I’ll give you insight. 🧠
 | `make apply`   | Applies the Terraform configuration (DynamoDB, etc.) |
 | `make destroy` | Destroys the Terraform infrastructure                |
 
+🚀 Usage
 
+Launch the CLI:
+
+make run
+
+You’ll see a menu like this:
+
+1. Fetch latest headlines and save an article
+2. List all stored article titles and dates
+3. Search articles by title and view content
+4. Summarize an article using Ollama
+5. Remove all entries from the database
+6. Exit
+
+Pick your option and enjoy the experience! 🎉
+🧠 Powered by
+
+    NewsData.io – Real-time news API
+
+    Ollama – Lightweight, local language models
+
+    Rich – Beautiful terminal outputs ✨
+
+    Markdownify – HTML → Markdown
+
+    AWS DynamoDB – Scalable cloud storage for your articles
+
+🐣 Future Ideas
+
+    Add tags or categories to articles
+
+    Auto-fetch top news daily
+
+    Export to Notion or Obsidian
+
+    Summarize multiple articles into one digest
+
+🤝 Contributing
+
+Pull requests are welcome! Help us improve by fixing bugs, adding features, or making it even cuter. 🐹
+🐾 Final Words
+
+Stay curious. Stay informed. And remember:
+
+    The best stories are the ones you understand.
+
+Happy reading! 💌
