@@ -25,6 +25,10 @@ Just give me a headline, and I’ll give you insight. 🧠
 
 ---
 
+## 📸 Sneak Peek
+
+https://github.com/user-attachments/assets/6fe3e543-94e2-4190-bab3-bf32e3bb8127
+
 ## ⚙️ Setup
 
 ### 🧰 Prerequisites
