@@ -1,0 +1,13 @@
+Statements:
+  - Effect: Allow
+    Action:
+      - dynamodb:PutItem
+      - dynamodb:GetItem
+      - dynamodb:Query
+    Resource: arn:aws:dynamodb:${opt:region}:${aws:accountId}:table/${self:provider.stage}-todo-table
+  - Effect: Allow
+    Action:
+      - sqs:SendMessage
+      - sqs:ReceiveMessage
+      - sqs:DeleteMessage
+    Resource: arn:aws:sqs:${opt:region}:${aws:accountId}:${self:provider.stage}-todo-queu

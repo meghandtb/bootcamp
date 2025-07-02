@@ -1,0 +1,132 @@
+service: todo-service
+
+provider:
+  name: aws
+  runtime: python3.12
+  stage: ${opt:stage}
+  region: ${opt:region}
+  environment:
+    TODO_QUEUE_URL:
+      Ref: TodoQueue
+    TODO_TABLE_NAME:
+      Ref: TodoTable
+
+functions:
+  createTodo:
+    handler: handler/create_todo.handler
+    name: ${self:service}-${self:provider.stage}_create_to_do
+    timeout: 30
+    vpc:
+      subnetIds:
+        - ${file(env-config.yml):${self:provider.stage}.subnet}
+      securityGroupIds:
+        - Ref: VPCSecurityGroup
+    events:
+      - httpApi:
+          path: /todo
+          method: post
+    iamRoleStatements: ${file(iam/createTodo-role.yml):Statements}
+
+  # processTodo:
+  #   handler: handler/process_todo.handler
+  #   name: ${self:service}-${self:provider.stage}_process_to_do
+  #   vpc:
+  #     subnetIds:
+  #       - ${file(env-config.yml):${self:provider.stage}.subnet}
+  #     securityGroupIds:
+  #       - Ref: VPCSecurityGroup
+  #   events:
+  #     - sqs:
+  #         arn:
+  #           Fn::GetAtt: [TodoQueue, Arn]
+  #   iamRoleStatements: ${file(iam/processTodo-role.yml):Statements}
+
+  processTodo:
+    handler: handler/process_todo.handler
+    name: ${self:service}-${self:provider.stage}_process_to_do
+    vpc:
+      subnetIds:
+        - ${file(env-config.yml):${self:provider.stage}.subnet}
+      securityGroupIds:
+        - Ref: VPCSecurityGroup
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [TodoQueue, Arn]
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:eu-west-1:384887332734:table/dev-todo-table
+
+  helperDLQ:
+    handler: handler/helper_dlq.handler
+    name: ${self:service}-${self:provider.stage}_helper_dlq
+    timeout: 30
+    vpc:
+      subnetIds:
+        - ${file(env-config.yml):${self:provider.stage}.subnet}
+      securityGroupIds:
+        - Ref: VPCSecurityGroup
+    events:
+      - schedule: rate(1 hour)
+    iamRoleStatements: ${file(iam/helperDLQ-role.yml):Statements}
+
+  helperTask:
+    handler: handler/helper_task.handler
+    name: ${self:service}-${self:provider.stage}_helper_task
+    timeout: 30
+    vpc:
+      subnetIds:
+        - ${file(env-config.yml):${self:provider.stage}.subnet}
+      securityGroupIds:
+        - Ref: VPCSecurityGroup
+    iamRoleStatements: ${file(iam/helperTask-role.yml):Statements}
+
+resources:
+  Resources:
+    VPCSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Security Group for ${self:provider.stage}
+        VpcId: ${file(env-config.yml):${self:provider.stage}.vpcId}
+        SecurityGroupIngress: []
+        SecurityGroupEgress: []
+
+    DynamoDbEndpoint:
+      Type: AWS::EC2::VPCEndpoint
+      Properties:
+        ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
+        VpcId: ${file(env-config.yml):${self:provider.stage}.vpcId}
+        RouteTableIds:
+          - ${file(env-config.yml):${self:provider.stage}.routeTableId}
+        VpcEndpointType: Gateway
+
+    SqsVpcEndpoint:
+      Type: AWS::EC2::VPCEndpoint
+      Properties:
+        ServiceName: !Sub com.amazonaws.${AWS::Region}.sqs
+        VpcId: ${file(env-config.yml):${self:provider.stage}.vpcId}
+        SubnetIds:
+          - ${file(env-config.yml):${self:provider.stage}.subnet}
+        SecurityGroupIds:
+          - !Ref VPCSecurityGroup
+        VpcEndpointType: Interface
+
+    TodoQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.stage}-todo-queue
+
+    TodoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-todo-table
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

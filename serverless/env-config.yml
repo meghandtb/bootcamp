@@ -1,0 +1,14 @@
+dev:
+  vpcId: vpc-0b630452cec671708
+  subnet: subnet-0315b2ec3838f8aeb
+  routeTableId: rtb-0afcdf44ab4e5d348
+
+stage:
+  vpcId: vpc-0ffff1234567890ff
+  subnet: subnet-0d7a209a9eec0509a
+  routeTableId: rtb-0afcdf44ab4e5d348
+
+prod:
+  vpcId: vpc-0abcde1234567890
+  subnet: subnet-01ac0f168a9d87496
+  routeTableId: rtb-0afcdf44ab4e5d348
