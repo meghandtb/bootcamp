@@ -1,8 +1,7 @@
 Statements:
-  Effect: Allow
-  Action:
-    - dynamodb:PutItem
-    - dynamodb:GetItem
-    - dynamodb:Query
-  # Resource: arn:aws:dynamodb:${opt:region}:${aws:accountId}:table/${self:provider.stage}-todo-table
-  Resource: arn:aws:dynamodb:eu-west-1:384887332734:table/dev-todo-table
+  - Effect: Allow
+    Action:
+      - dynamodb:PutItem
+      - dynamodb:GetItem
+      - dynamodb:Query
+    Resource: arn:aws:dynamodb:${opt:region}:${aws:accountId}:table/${self:provider.stage}-todo-table

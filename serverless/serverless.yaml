@@ -11,6 +11,10 @@ provider:
     TODO_TABLE_NAME:
       Ref: TodoTable
 
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-python-requirements
+
 functions:
   createTodo:
     handler: handler/create_todo.handler
@@ -27,20 +31,6 @@ functions:
           method: post
     iamRoleStatements: ${file(iam/createTodo-role.yml):Statements}
 
-  # processTodo:
-  #   handler: handler/process_todo.handler
-  #   name: ${self:service}-${self:provider.stage}_process_to_do
-  #   vpc:
-  #     subnetIds:
-  #       - ${file(env-config.yml):${self:provider.stage}.subnet}
-  #     securityGroupIds:
-  #       - Ref: VPCSecurityGroup
-  #   events:
-  #     - sqs:
-  #         arn:
-  #           Fn::GetAtt: [TodoQueue, Arn]
-  #   iamRoleStatements: ${file(iam/processTodo-role.yml):Statements}
-
   processTodo:
     handler: handler/process_todo.handler
     name: ${self:service}-${self:provider.stage}_process_to_do
@@ -53,12 +43,7 @@ functions:
       - sqs:
           arn:
             Fn::GetAtt: [TodoQueue, Arn]
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:PutItem
-        Resource:
-          - arn:aws:dynamodb:eu-west-1:384887332734:table/dev-todo-table
+    iamRoleStatements: ${file(iam/processTodo-role.yml):Statements}
 
   helperDLQ:
     handler: handler/helper_dlq.handler
@@ -91,8 +76,15 @@ resources:
       Properties:
         GroupDescription: Security Group for ${self:provider.stage}
         VpcId: ${file(env-config.yml):${self:provider.stage}.vpcId}
-        SecurityGroupIngress: []
-        SecurityGroupEgress: []
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+        SecurityGroupEgress:
+          - IpProtocol: -1
+            FromPort: 0
+            ToPort: 0
+            CidrIp: 0.0.0.0/0
 
     DynamoDbEndpoint:
       Type: AWS::EC2::VPCEndpoint

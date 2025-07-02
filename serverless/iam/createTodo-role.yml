@@ -1,7 +1,7 @@
 Statements:
-  Effect: Allow
-  Action:
-    - sqs:SendMessage
-    - sqs:ReceiveMessage
-    - sqs:DeleteMessage
-  Resource: arn:aws:sqs:${opt:region}:${aws:accountId}:${self:provider.stage}-todo-queue
+  - Effect: Allow
+    Action:
+      - sqs:SendMessage
+      - sqs:ReceiveMessage
+      - sqs:DeleteMessage
+    Resource: arn:aws:sqs:${opt:region}:${aws:accountId}:${self:provider.stage}-todo-queue
