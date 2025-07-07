@@ -107,15 +107,15 @@ Node-b to Node-a:
 💭 Reflection
 ✅ What was easier with Terraform?
 
-    Modular and reusable: Easier to split into main.tf, variables.tf, and outputs.tf
+    Easier to split into main.tf, variables.tf, and outputs.tf
 
-    Stateful infrastructure tracking: Terraform’s state file helps detect drift and simplifies updates
+    Terraform’s state file helps detect drift and simplifies updates
 
-    Faster iteration: Changes apply faster than redeploying full CloudFormation stacks
+    Changes apply faster than redeploying full CloudFormation stacks
 
 🤔 What was easier with CloudFormation?
 
-    Native AWS integration: Easier to view and manage resources directly in the CloudFormation console
+    Easier to view and manage resources directly in the CloudFormation console, since it has direct integration with AWS
 
     No extra tools needed beyond the AWS CLI/console
 
@@ -125,4 +125,4 @@ Node-b to Node-a:
 
     Split the variables in the CloudFormation code similar to how it was done for Terraform, for better reusability
 
-    Automate private key handling using user_data or AWS SSM parameters (instead of manual key copying)
+    Automate private key handling 
