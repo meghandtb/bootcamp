@@ -65,11 +65,11 @@ A key pair was created via the AWS Console and used for SSH access:
 
 Since the instances are in private subnets, I used EC2 Instance Connect + Private IP to SSH in from one instance to another.
 
-SSH from Node-a to Node-b
+SSH from Node-a to Node-b:
 
 ![image](https://github.com/user-attachments/assets/2cc8e313-864b-4661-b98f-000dd98ed590)
 
-SSH from Node-A to Node-B
+SSH from Node-b to Node-a:
 
 ![image](https://github.com/user-attachments/assets/ec010c94-58dd-45f7-bb06-8bffc6e8165b)
 
@@ -95,12 +95,12 @@ aws cloudformation create-stack \
 
 Internal SSH Tests
 
-Node-A to Node-B:
+Node-a to Node-b:
 
 
 ![image](https://github.com/user-attachments/assets/33514fc2-7e88-4121-9685-e9a163348715)
 
-Node-B to Node-A:
+Node-b to Node-a:
 
 ![image](https://github.com/user-attachments/assets/b2625252-17eb-4f62-a758-8a7b30caf40b)
 
