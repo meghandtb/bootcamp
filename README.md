@@ -69,3 +69,30 @@ SSH from Node-b to Node-a:
 SSH from Node-a to Node-b:
 
 ![image](https://github.com/user-attachments/assets/2cc8e313-864b-4661-b98f-000dd98ed590)
+
+
+Terraform Infrastructure cleanup
+
+Ran terraform destroy in order to clean up the terraform infrastructure, so it can be deployed trough CloudFormation.
+
+Cloud Formation Infrastructure:
+
+Create the CloudFormation stack as follows:
+
+aws cloudformation create-stack \                       
+  --stack-name cyber-vpc-stack \
+  --template-body file://infrastructure.yaml \
+  --capabilities CAPABILITY_NAMED_IAM
+
+![image](https://github.com/user-attachments/assets/ba37cb4f-d1e6-494f-8402-87610c327a4d)
+
+SSH from Node-a to Node-b:
+
+![image](https://github.com/user-attachments/assets/33514fc2-7e88-4121-9685-e9a163348715)
+
+SSH from Node-b to Node-a:
+
+![image](https://github.com/user-attachments/assets/b2625252-17eb-4f62-a758-8a7b30caf40b)
+
+
+
