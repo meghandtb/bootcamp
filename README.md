@@ -119,6 +119,8 @@ Node-b to Node-a:
 
     No extra tools needed beyond the AWS CLI/console
 
+    Less written code
+
 🛠️ What I'd improve
 
     Use modules in Terraform to improve structure and reuse
