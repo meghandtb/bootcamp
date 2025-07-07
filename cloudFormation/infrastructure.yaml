@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Cyber VPC with 2 EC2 instances and internal SSH access
+
+Resources:
+  CyberVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.10.0.0/16
+      Tags:
+        - Key: Name
+          Value: cyber-vpc-cloud-formation
+
+  SubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CyberVPC
+      CidrBlock: 10.10.1.0/24
+      AvailabilityZone: eu-west-1a
+
+  SubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CyberVPC
+      CidrBlock: 10.10.2.0/24
+      AvailabilityZone: eu-west-1b
+
+  SecurityGroupSSH:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH within subnets
+      VpcId: !Ref CyberVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 10.10.1.0/24
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 10.10.2.0/24
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 0
+          CidrIp: 0.0.0.0/0
+
+  EC2InstanceA:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      KeyName: terraform-key
+      ImageId: ami-0db1de538d84beea0
+      SubnetId: !Ref SubnetA
+      SecurityGroupIds:
+        - !Ref SecurityGroupSSH
+
+  EC2InstanceB:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      KeyName: terraform-key
+      ImageId: ami-0db1de538d84beea0
+      SubnetId: !Ref SubnetB
+      SecurityGroupIds:
+        - !Ref SecurityGroupSSH
