@@ -67,11 +67,11 @@ Since the instances are in private subnets, I used EC2 Instance Connect + Privat
 
 SSH from Node-a to Node-b
 
-![image](https://github.com/user-attachments/assets/ec010c94-58dd-45f7-bb06-8bffc6e8165b)
+![image](https://github.com/user-attachments/assets/2cc8e313-864b-4661-b98f-000dd98ed590)
 
 SSH from Node-A to Node-B
 
-![image](https://github.com/user-attachments/assets/2cc8e313-864b-4661-b98f-000dd98ed590)
+![image](https://github.com/user-attachments/assets/ec010c94-58dd-45f7-bb06-8bffc6e8165b)
 
 🧹 Terraform Cleanup
 
