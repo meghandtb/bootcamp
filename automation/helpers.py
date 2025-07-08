@@ -108,14 +108,12 @@ def query_ollama(model: str, prompt: str, stream=False) -> str:
         else:
             return f"[Error] Request exception: {e}"
 
-def truncate_dynamodb_table(table_name=TABLE_NAME):
+def truncate_dynamodb_table(console, table_name=TABLE_NAME):
     table = dynamodb.Table(table_name)
 
     try:
         key_schema = table.key_schema
         key_names = [key["AttributeName"] for key in key_schema]
-
-        print(f"Truncating table '{table_name}' using key(s): {key_names}")
 
         deleted_count = 0
         scan_kwargs = {}
@@ -137,7 +135,10 @@ def truncate_dynamodb_table(table_name=TABLE_NAME):
             else:
                 break
 
-        print(f"Successfully deleted {deleted_count} items from '{table_name}'.")
+        if deleted_count == 0:
+            console.print("[yellow]\n⚠️  The database is already empty. No items to delete.[/yellow]")
+        else:
+            console.print(f"[green]✅ Successfully deleted {deleted_count} item(s) from '{table_name}'.[/green]")
 
     except Exception as e:
-        print(f"[Error] Failed to truncate table: {e}")
+        console.print(f"[red][Error] Failed to truncate table: {e}[/red]")

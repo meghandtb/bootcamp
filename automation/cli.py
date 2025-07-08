@@ -11,6 +11,7 @@ from rich.live import Live
 from rich.text import Text
 from rich.console import Group
 from time import sleep
+from requests.exceptions import HTTPError
 
 load_dotenv()
 console = Console()
@@ -69,11 +70,12 @@ def banner():
 def fetch_and_store_article():
     query = Prompt.ask("Enter search query for headlines")
     headlines = fetch_headlines(query=query, apikey=NEWSDATA_API_KEY)
+
     if not headlines:
         console.print("[red]No headlines found.[/red]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
         return
 
-    # Show top 5 headlines for user to pick
     table = Table(title="Select an article to save")
     table.add_column("Index", style="cyan", no_wrap=True)
     table.add_column("Title", style="green")
@@ -83,49 +85,70 @@ def fetch_and_store_article():
         table.add_row(str(i), headline.get("title", "N/A"), headline.get("pubDate", "N/A"))
     console.print(table)
 
-    choice = IntPrompt.ask("Choose article index to save", choices=[str(i) for i in range(1, min(len(headlines),5)+1)])
-    selected = headlines[choice - 1]
+    try:
+        choice = IntPrompt.ask("Choose article index to save", choices=[str(i) for i in range(1, min(len(headlines), 5) + 1)])
+        selected = headlines[choice - 1]
+    except (ValueError, IndexError):
+        console.print("[red]❌ Invalid selection. Please enter a valid number.[/red]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
+        return
 
     article_url = selected.get("link")
     article_title = selected.get("title")
     article_date = selected.get("pubDate")
 
-    article_json = extract_article_json(article_url)
+    try:
+        article_json = extract_article_json(article_url)
+    except HTTPError as e:
+        console.print(f"[red]Failed to fetch the page: {e}[/red]")
+        console.print("[yellow]\nThis article might be behind a paywall or not accessible.[/yellow]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
+        return
+    except Exception as e:
+        console.print(f"[red]Unexpected error during article extraction: {e}[/red]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
+        return
+
     if not article_json or 'content' not in article_json:
         console.print("[red]Failed to extract article content.[/red]")
+        console.print("[yellow]\nThe article may be restricted or the page structure might have changed.[/yellow]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
         return
 
     content = article_json['content']
     article_md_content = md(content)
-    
-    # console.clear()
 
     load_article_to_dynamodb(article_title, article_date, article_md_content)
     console.print(f"\n[green]Article '{article_title}' saved successfully![/green]")
 
+    Prompt.ask("\nPress Enter to go back", default="", show_default=False)
+
 def list_articles():
     articles = get_all_articles()
     if not articles:
-        console.print("[yellow]No articles stored yet. Choose option 1 so you can add some. [/yellow]")
+        console.print("[bold yellow]⚠️  No articles are currently stored in the database. Add some and come back later.[/bold yellow]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
         return
 
-    table = Table(title="articles")
+    table = Table(title="🗂️  Articles in Database")
     table.add_column("Title", style="cyan")
     table.add_column("Date", style="magenta")
 
     for art in articles:
         table.add_row(art.get("title", "N/A"), art.get("date", "N/A"))
+
     console.print(table)
+    Prompt.ask("\nPress Enter to go back", default="", show_default=False)
 
 def view_article_content():
     articles = get_all_articles()
     if not articles:
-        console.print("[bold yellow]⚠️  No articles are currently stored in the database.[/bold yellow]")
+        console.print("[bold yellow]⚠️  No articles are currently stored in the database. Add some and come back later.[/bold yellow]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
         return
 
     titles = [article["title"] for article in articles]
 
-    # Show titles in a rich table
     table = Table(title="📰 Available Articles")
     table.add_column("Index", justify="right")
     table.add_column("Title", style="cyan", overflow="fold")
@@ -142,17 +165,21 @@ def view_article_content():
         )
         selected_title = titles[choice - 1]
     except (ValueError, IndexError):
-        console.print("[red]Invalid selection.[/red]")
+        console.print("[red]❌ Invalid selection. Please choose a valid index.[/red]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
         return
 
     selected_articles = get_article_content_by_title(selected_title)
     if not selected_articles:
         console.print(f"[yellow]No content found for '{selected_title}'.[/yellow]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
         return
 
     for article in selected_articles:
         console.rule(f"🗓️  Date: {article['date']}")
         console.print(article['content'])
+
+    Prompt.ask("\nPress Enter to go back", default="", show_default=False)
 
 def summarize_article():
     prompt = """
@@ -165,12 +192,12 @@ def summarize_article():
 
     articles = get_all_articles()
     if not articles:
-        console.print("[yellow]No articles found in the database. Choose option 1 so you can add some. [/yellow]")
+        console.print("[bold yellow]⚠️  No articles are currently stored in the database. Add some and come back later.[/bold yellow]")
+        Prompt.ask("Press Enter to go back", default="", show_default=False)
         return
 
     titles = [article["title"] for article in articles]
 
-    # Show titles in a rich table
     table = Table(title="📰 Available Articles")
     table.add_column("Index", justify="right")
     table.add_column("Title", style="cyan", overflow="fold")
@@ -180,30 +207,37 @@ def summarize_article():
 
     console.print(table)
 
-    choice = Prompt.ask("\nEnter the number of the article to summarize", choices=[str(i) for i in range(1, len(titles) + 1)])
-    selected_title = titles[int(choice) - 1]
+    try:
+        choice = IntPrompt.ask("\nEnter the number of the article to summarize",
+                               choices=[str(i) for i in range(1, len(titles) + 1)])
+        selected_title = titles[choice - 1]
+    except (ValueError, IndexError):
+        console.print("[red]❌ Invalid selection. Please enter a valid number.[/red]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
+        return
 
     articles_to_summarize = get_article_content_by_title(selected_title)
     if not articles_to_summarize:
         console.print(f"[yellow]No articles found with title '{selected_title}'.[/yellow]")
+        Prompt.ask("\nPress Enter to go back", default="", show_default=False)
         return
 
     for article in articles_to_summarize:
-        # spinner = Spinner("bouncingBar", text="🐼 Panda is thinking... please wait!")
-        # with Live(spinner, console=console, refresh_per_second=12):
-        #     summary = query_ollama("phi4-mini:3.8b", f"Summarize the following article in a few sentences: {article['content']}", stream=False)
-        # console.rule(f"Summary for article dated {article['date']}")
-        # console.print(summary)
-
         spinner = Spinner("bouncingBar", text="🦙 Lama is thinking... Please wait!")
         summary_text = Text()
         with Live(Group(spinner, summary_text), console=console, refresh_per_second=12) as live:
-            for chunk in query_ollama("phi4-mini:3.8b", f"{prompt} Title: {selected_title} Content: {article['content']}", stream=True):
+            for chunk in query_ollama(
+                "phi4-mini:3.8b",
+                f"{prompt} Title: {selected_title} Content: {article['content']}",
+                stream=True
+            ):
                 summary_text.append(chunk)
                 live.update(Group(spinner, summary_text))
 
         console.print()
         console.rule("[ [bold red]Summary completed![/bold red] ]")
+
+    Prompt.ask("\nPress Enter to go back", default="", show_default=False)
 
 def main_menu():
     console.print()
@@ -221,7 +255,15 @@ def main():
     banner()
     while True:
         main_menu()
-        choice = IntPrompt.ask("Choose an option", choices=["1", "2", "3", "4", "5", "6"])
+        choice = None
+        while choice not in [1,2,3,4,5,6]:
+            try:
+                choice = IntPrompt.ask("Choose an option")
+                if choice not in [1,2,3,4,5,6]:
+                    console.print("[red]Please enter a number between 1 and 6.[/red]")
+            except ValueError:
+                console.print("[red]Invalid input. Please enter a valid number.[/red]")
+
         if choice == 1:
             fetch_and_store_article()
         elif choice == 2:
@@ -231,11 +273,10 @@ def main():
         elif choice == 4:
             summarize_article()
         elif choice == 5:
-            truncate_dynamodb_table()
+            truncate_dynamodb_table(console)
         elif choice == 6:
             console.print("[bold green]Goodbye![/bold green]")
             break
 
 if __name__ == "__main__":
     main()
-
