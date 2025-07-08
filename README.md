@@ -39,7 +39,7 @@ https://github.com/user-attachments/assets/6fe3e543-94e2-4190-bab3-bf32e3bb8127
 - AWS credentials configured (`aws configure`)
 - `Ollama` installed and running locally in a docker container
 
-API Key Setup
+🔑 NewsData API Key Setup
 
 Go to NewsData.io Dashboard and create a free account to get your API key.
 
